@@ -34,6 +34,32 @@ class TaskSerializer(serializers.ModelSerializer):
             return obj.due_date < timezone.now().date()
         return False
 
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
+        # If user is a member, all fields except 'status' are read-only
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            if request.user.role == 'member':
+                for field_name in fields:
+                    if field_name != 'status':
+                        fields[field_name].read_only = True
+        return fields
+
+    def validate(self, attrs):
+        project = attrs.get('project')
+        assigned_to = attrs.get('assigned_to')
+        
+        # When updating, project or assigned_to might not be in attrs, so fall back to instance
+        if not project and self.instance:
+            project = self.instance.project
+        if not assigned_to and 'assigned_to' not in attrs and self.instance:
+            assigned_to = self.instance.assigned_to
+
+        if project and assigned_to:
+            if not project.members.filter(id=assigned_to.id).exists():
+                raise serializers.ValidationError({"assigned_to": "Assigned user is not a member of this project."})
+        return attrs
+
     def create(self, validated_data):
         """Auto-set created_by to the requesting user."""
         validated_data['created_by'] = self.context['request'].user

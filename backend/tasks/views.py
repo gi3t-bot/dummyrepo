@@ -6,6 +6,7 @@ Key design decisions:
 - Dashboard stats are computed here
 """
 
+from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -33,8 +34,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
         project_id = self.request.query_params.get('project')
 
         if user.role == 'admin':
-            # Admin sees all tasks in projects they own
-            qs = Task.objects.filter(project__owner=user)
+            # Admin sees all tasks in projects they own or assigned to them
+            qs = Task.objects.filter(Q(project__owner=user) | Q(assigned_to=user))
         else:
             # Member only sees their assigned tasks
             qs = Task.objects.filter(assigned_to=user)
@@ -64,19 +65,13 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'admin':
-            return Task.objects.filter(project__owner=user)
+            return Task.objects.filter(Q(project__owner=user) | Q(assigned_to=user))
         # Members can only access their own tasks
         return Task.objects.filter(assigned_to=user)
 
     def check_object_permissions(self, request, obj):
         super().check_object_permissions(request, obj)
-        # Members can only update status — not reassign, delete, etc.
-        if request.method in ['PUT', 'PATCH']:
-            if request.user.role == 'member':
-                allowed_fields = {'status'}
-                incoming_fields = set(request.data.keys())
-                if not incoming_fields.issubset(allowed_fields):
-                    raise PermissionDenied("Members can only update task status.")
+        # Members are restricted via serializer read_only fields.
         # Only admins can delete
         if request.method == 'DELETE' and request.user.role != 'admin':
             raise PermissionDenied("Only admins can delete tasks.")
@@ -94,8 +89,8 @@ class DashboardStatsView(APIView):
         today = timezone.now().date()
 
         if user.role == 'admin':
-            # Admins see stats for all tasks in their projects
-            all_tasks = Task.objects.filter(project__owner=user)
+            # Admins see stats for all tasks in their projects or assigned to them
+            all_tasks = Task.objects.filter(Q(project__owner=user) | Q(assigned_to=user))
         else:
             # Members see stats for tasks assigned to them
             all_tasks = Task.objects.filter(assigned_to=user)

@@ -3,6 +3,7 @@ Views for the projects app.
 Implements CRUD with role-based access control.
 """
 
+from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from .models import Project
@@ -34,7 +35,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
         Admins see projects they own; members see projects they're in.
         """
         user = self.request.user
-        return Project.objects.filter(members=user).distinct()
+        return Project.objects.filter(Q(owner=user) | Q(members=user)).distinct()
 
 
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -48,7 +49,8 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         """Users can only access projects they're members of."""
-        return Project.objects.filter(members=self.request.user).distinct()
+        user = self.request.user
+        return Project.objects.filter(Q(owner=user) | Q(members=user)).distinct()
 
     def check_object_permissions(self, request, obj):
         """Only the project owner can edit or delete."""
