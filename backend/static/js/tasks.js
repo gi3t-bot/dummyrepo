@@ -13,7 +13,7 @@ initThemeToggle('theme-btn');
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   clearAuth();
-  window.location.href = 'index.html';
+  window.location.href = '/';
 });
 
 // Admin sees "New Task" button

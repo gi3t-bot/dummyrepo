@@ -73,7 +73,7 @@ export function initThemeToggle(buttonId) {
  */
 export function requireAuth() {
   if (!localStorage.getItem('access')) {
-    window.location.href = 'index.html';
+    window.location.href = '/';
     return;
   }
 
@@ -91,7 +91,7 @@ export function requireAuth() {
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('user');
-        window.location.href = 'index.html';
+        window.location.href = '/';
       } else {
         // They clicked No -> stay on the page by pushing another dummy state
         history.pushState(null, '', location.href);

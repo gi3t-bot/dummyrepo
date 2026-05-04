@@ -7,7 +7,7 @@ import { showToast, showFormError, clearFormError, parseApiError, initThemeToggl
 
 // Redirect if already logged in
 if (localStorage.getItem('access')) {
-  window.location.href = 'dashboard.html';
+  window.location.href = '/dashboard/';
 }
 
 // Initialize theme toggle
@@ -63,7 +63,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     saveUser(data.user);
 
     showToast('Welcome back, ' + data.user.username + '!');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+    setTimeout(() => { window.location.href = '/dashboard/'; }, 600);
 
   } catch (err) {
     showFormError('login-error', parseApiError(err));

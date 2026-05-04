@@ -13,7 +13,7 @@ initThemeToggle('theme-btn');
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   clearAuth();
-  window.location.href = 'index.html';
+  window.location.href = '/';
 });
 
 // Show admin-only buttons
@@ -110,7 +110,11 @@ function renderMembers(members) {
     container.innerHTML = '<p class="text-muted">No members yet.</p>';
     return;
   }
-  container.innerHTML = members.map(m => `
+  container.innerHTML = members.map(m => {
+    // Admins can remove anyone EXCEPT the original project owner
+    const canRemove = user?.role === 'admin' && m.id !== currentProject.owner;
+    
+    return `
     <div class="d-flex align-center gap-1" style="margin-bottom:0.5rem;">
       <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:0.85rem;">
         ${m.username[0].toUpperCase()}
@@ -119,10 +123,33 @@ function renderMembers(members) {
         <div style="font-weight:500;font-size:0.9rem;">${m.username}</div>
         <div class="text-muted" style="font-size:0.75rem;">${m.email}</div>
       </div>
-      <span class="badge badge-${m.role}" style="margin-left:auto;">${m.role}</span>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+        <span class="badge badge-${m.role}">${m.role}</span>
+        ${canRemove ? `<button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.4rem; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);" onclick="removeMember(${m.id}, '${m.username}')">Remove</button>` : ''}
+      </div>
     </div>
-  `).join('');
+  `}).join('');
 }
+
+window.removeMember = async function(memberId, username) {
+  if (!confirm(`Remove ${username} from this project?`)) return;
+  
+  const existingIds = currentProject.members.map(Number);
+  const newMembers = existingIds.filter(id => id !== memberId);
+
+  try {
+    const updated = await api.put(`/projects/${currentProject.id}/`, {
+      name: currentProject.name,
+      description: currentProject.description,
+      members: newMembers,
+    });
+    currentProject = updated;
+    renderMembers(updated.members_detail || []);
+    showToast(`${username} removed from the project.`);
+  } catch (err) {
+    showToast('Failed to remove member.');
+  }
+};
 
 // Add member button
 document.getElementById('add-member-btn').addEventListener('click', async () => {

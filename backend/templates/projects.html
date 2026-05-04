@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +8,7 @@
   <title>Projects — TeamTask</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script>
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
@@ -23,9 +24,9 @@
         <p id="sidebar-username">Loading...</p>
       </div>
       <nav class="sidebar-nav">
-        <a href="dashboard.html">📊 Dashboard</a>
-        <a href="projects.html" class="active">📁 Projects</a>
-        <a href="tasks.html">✅ My Tasks</a>
+        <a href="/dashboard/">📊 Dashboard</a>
+        <a href="/projects/" class="active">📁 Projects</a>
+        <a href="/tasks/">✅ My Tasks</a>
       </nav>
       <div class="sidebar-footer">
         <button class="theme-toggle w-100" id="theme-btn">🌙 Dark</button>
@@ -122,7 +123,7 @@
   </div>
 
   <div id="toast"></div>
-  <script type="module" src="js/projects.js"></script>
+  <script type="module" src="{% static 'js/projects.js' %}"></script>
 </body>
 
 </html>

@@ -23,7 +23,7 @@ initThemeToggle('theme-btn');
 // Logout
 document.getElementById('logout-btn').addEventListener('click', () => {
   clearAuth();
-  window.location.href = 'index.html';
+  window.location.href = '/';
 });
 
 /* Load dashboard stats */
@@ -70,7 +70,7 @@ async function loadRecentTasks() {
           <tbody>
             ${myTasks.map(task => `
               <tr>
-                <td><a href="tasks.html">${task.title}</a></td>
+                <td><a href="/tasks/">${task.title}</a></td>
                 <td>${task.project}</td>
                 <td>${statusBadge(task.status)}</td>
                 <td>${formatDate(task.due_date)}</td>
@@ -95,7 +95,7 @@ async function loadRecentProjects() {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">📁</div>
-          <p>No projects yet. ${user?.role === 'admin' ? '<a href="projects.html">Create one →</a>' : 'Ask your admin to add you.'}</p>
+          <p>No projects yet. ${user?.role === 'admin' ? '<a href="/projects/">Create one →</a>' : 'Ask your admin to add you.'}</p>
         </div>`;
       return;
     }
@@ -103,7 +103,7 @@ async function loadRecentProjects() {
     container.innerHTML = `
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
         ${recent.map(p => `
-          <a href="projects.html?id=${p.id}" style="text-decoration:none;">
+          <a href="/projects/?id=${p.id}" style="text-decoration:none;">
             <div class="stat-card" style="cursor:pointer;">
               <div style="font-weight:600; color:var(--text-primary); margin-bottom:0.25rem;">${p.name}</div>
               <div class="text-muted">${p.members_detail?.length || 0} members</div>
