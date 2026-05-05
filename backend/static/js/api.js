@@ -3,7 +3,7 @@
  * All fetch calls go through here so we don't repeat auth headers everywhere.
  */
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = window.location.origin + '/api';
 
 /**
  * Store tokens after login

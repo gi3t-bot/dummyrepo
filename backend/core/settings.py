@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-dev-key-change-in-prod")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "dummyrepo-production-5a10.up.railway.app").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,dummyrepo-production-5a10.up.railway.app").split(",")
 
 
 # Application definition
@@ -116,6 +116,9 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500"
 ).split(",")
+if "" in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.remove("")
+
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
