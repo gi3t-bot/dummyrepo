@@ -1,4 +1,7 @@
-"""Serializers for the projects app."""
+"""
+projects/serializers.py
+project serializer — also handles setting the owner and adding members
+"""
 
 from rest_framework import serializers
 from .models import Project
@@ -7,9 +10,9 @@ from users.serializers import UserSerializer
 
 class ProjectSerializer(serializers.ModelSerializer):
     """
-    Serializes project data.
-    owner_detail and members_detail are read-only nested representations
-    so the frontend gets full user objects, not just IDs.
+    owner_detail and members_detail are read-only nested fields
+    so the frontend gets full user objects instead of just IDs
+    the writable fields are still just 'owner' and 'members' (IDs)
     """
 
     owner_detail = UserSerializer(source='owner', read_only=True)
@@ -26,15 +29,14 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at', 'owner']
 
     def create(self, validated_data):
-        """Auto-set the owner to the requesting user."""
+        """set owner to whoever is making the request, then add them as a member too"""
         members = validated_data.pop('members', [])
         project = Project.objects.create(
             owner=self.context['request'].user,
             **validated_data
         )
-        # Add members if provided
         if members:
             project.members.set(members)
-        # Always add owner as a member too
+        # always add the owner as a member
         project.members.add(self.context['request'].user)
         return project

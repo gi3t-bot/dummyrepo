@@ -1,6 +1,7 @@
 """
-Task model.
-A task belongs to a project and can be assigned to a member.
+tasks/models.py
+task belongs to a project and can be assigned to a user
+status goes pending -> in_progress -> completed
 """
 
 from django.db import models
@@ -10,8 +11,8 @@ from projects.models import Project
 
 class Task(models.Model):
     """
-    Represents a unit of work within a project.
-    Status flows: pending → in_progress → completed
+    a unit of work inside a project
+    can be assigned to someone or left unassigned
     """
 
     STATUS_CHOICES = [
@@ -29,10 +30,10 @@ class Task(models.Model):
     )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,  # Task stays if user is deleted
+        on_delete=models.SET_NULL,  # task stays even if the user is deleted
         null=True,
         blank=True,
-        related_name='assigned_tasks',  # user.assigned_tasks.all()
+        related_name='assigned_tasks',
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -50,7 +51,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['due_date', '-created_at']  # Urgent tasks first
+        ordering = ['due_date', '-created_at']  # urgent tasks first
 
     def __str__(self):
         return f"{self.title} [{self.status}]"

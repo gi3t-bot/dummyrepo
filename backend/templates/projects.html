@@ -1,129 +1,171 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Projects — TeamTask</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="description" content="View and manage your team projects." />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script>
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
   </script>
 </head>
-
 <body>
 
-  <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <h2>🗂️ TeamTask</h2>
-        <p id="sidebar-username">Loading...</p>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard/">📊 Dashboard</a>
-        <a href="/projects/" class="active">📁 Projects</a>
-        <a href="/tasks/">✅ My Tasks</a>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="theme-toggle w-100" id="theme-btn">🌙 Dark</button>
-        <button class="btn btn-outline w-100" id="logout-btn" style="margin-top: 0.5rem;">🚪 Logout</button>
-      </div>
-    </aside>
+<div class="app-layout">
 
-    <main class="main-content">
-      <div class="topbar">
-        <h1>Projects</h1>
-        <div class="topbar-actions">
-          <!-- Only shown to admins via JS -->
-          <button class="btn btn-primary" id="new-project-btn" style="display:none;">
-            + New Project
-          </button>
-        </div>
-      </div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <h2>🗂️ TeamTask</h2>
+      <p id="sidebar-username">Loading...</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard/">📊 Dashboard</a>
+      <a href="/projects/" class="active">📁 Projects</a>
+      <a href="/tasks/">✅ My Tasks</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="theme-btn">🌙 Dark</button>
+      <button class="btn btn-outline" id="logout-btn">🚪 Logout</button>
+    </div>
+  </aside>
 
-      <!-- Projects grid -->
-      <div id="projects-container">
-        <div class="empty-state">
-          <div class="empty-icon">⏳</div>
-          <p>Loading...</p>
-        </div>
-      </div>
-
-      <!-- Project Detail (shown when a project is selected) -->
-      <div id="project-detail" style="display:none;">
-        <div class="d-flex align-center gap-1 mb-2" style="margin-top:1.5rem;">
-          <button class="btn btn-outline btn-sm" id="back-btn">← Back</button>
-          <h2 id="detail-name"></h2>
-        </div>
-        <p class="text-secondary mb-2" id="detail-description"></p>
-
-        <!-- Members section -->
-        <div class="card mb-2">
-          <div class="card-header">
-            <h3>Team Members</h3>
-            <button class="btn btn-outline btn-sm" id="add-member-btn" style="display:none;">+ Add Member</button>
-          </div>
-          <div class="card-body" id="members-list"></div>
-        </div>
-
-        <!-- Tasks in this project -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Tasks</h3>
-            <button class="btn btn-primary btn-sm" id="add-task-btn" style="display:none;">+ Add Task</button>
-          </div>
-          <div class="card-body" id="project-tasks-list"></div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- New Project Modal -->
-  <div class="modal-backdrop" id="project-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Create New Project</h3>
-        <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="project-form-error"></div>
-        <div class="form-group">
-          <label for="project-name">Project Name *</label>
-          <input id="project-name" class="form-control" type="text" placeholder="e.g. Website Redesign" required />
-        </div>
-        <div class="form-group">
-          <label for="project-description">Description</label>
-          <textarea id="project-description" class="form-control" rows="3"
-            placeholder="What is this project about?"></textarea>
-        </div>
-        <button class="btn btn-primary btn-block" id="create-project-btn">Create Project</button>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>Projects</h1>
+      <div class="topbar-actions">
+        <!-- admin only, shown by JS -->
+        <button class="btn btn-primary" id="new-project-btn" style="display:none;">+ New Project</button>
       </div>
     </div>
-  </div>
 
-  <!-- Add Member Modal -->
-  <div class="modal-backdrop" id="member-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Add Team Member</h3>
-        <button class="modal-close" onclick="closeModal('member-modal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="member-select">Select User</label>
-          <select id="member-select" class="form-control"></select>
-        </div>
-        <button class="btn btn-primary btn-block" id="confirm-add-member-btn">Add to Project</button>
+    <!-- Projects list -->
+    <div id="projects-container">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <p>Loading...</p>
       </div>
     </div>
-  </div>
 
-  <div id="toast"></div>
-  <script type="module" src="{% static 'js/projects.js' %}"></script>
+    <!-- Project detail (shown when a project is clicked) -->
+    <div id="project-detail" style="display:none;">
+
+      <div class="d-flex align-center gap-1 mb-2" style="margin-top: 14px;">
+        <button class="btn btn-outline btn-sm" id="back-btn">&larr; Back</button>
+        <h2 id="detail-name" style="font-size:16px;"></h2>
+      </div>
+      <p class="text-secondary mb-2" id="detail-description"></p>
+
+      <!-- Members -->
+      <div class="card mb-2">
+        <div class="card-header">
+          <h3>Team Members</h3>
+          <button class="btn btn-outline btn-sm" id="add-member-btn" style="display:none;">+ Add Member</button>
+        </div>
+        <div class="card-body" id="members-list"></div>
+      </div>
+
+      <!-- Tasks in project -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Tasks</h3>
+          <button class="btn btn-primary btn-sm" id="add-task-btn" style="display:none;">+ Add Task</button>
+        </div>
+        <div class="card-body" id="project-tasks-list"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- New Project Modal -->
+<div class="modal-backdrop" id="project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create New Project</h3>
+      <button class="modal-close" onclick="closeModal('project-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="project-form-error"></div>
+      <div class="form-group">
+        <label for="project-name">Project Name *</label>
+        <input id="project-name" class="form-control" type="text" placeholder="e.g. Website Redesign" required />
+      </div>
+      <div class="form-group">
+        <label for="project-description">Description</label>
+        <textarea id="project-description" class="form-control" rows="3" placeholder="What is this project about?"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" id="create-project-btn">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal-backdrop" id="member-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Team Member</h3>
+      <button class="modal-close" onclick="closeModal('member-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="member-select">Select User</label>
+        <select id="member-select" class="form-control"></select>
+      </div>
+      <button class="btn btn-primary btn-block" id="confirm-add-member-btn">Add to Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Task Modal (opens from inside a project detail) -->
+<div class="modal-backdrop" id="project-task-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Task to <span id="project-task-modal-name"></span></h3>
+      <button class="modal-close" onclick="closeModal('project-task-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="project-task-form-error"></div>
+
+      <div class="form-group">
+        <label for="pt-title">Title *</label>
+        <input id="pt-title" class="form-control" type="text" placeholder="What needs to be done?" required />
+      </div>
+
+      <div class="form-group">
+        <label for="pt-description">Description</label>
+        <textarea id="pt-description" class="form-control" rows="3" placeholder="Add more details..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pt-assigned">Assign To</label>
+          <select id="pt-assigned" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="pt-status">Status</label>
+          <select id="pt-status" class="form-control">
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pt-due">Due Date</label>
+        <input id="pt-due" class="form-control" type="date" />
+      </div>
+
+      <button class="btn btn-primary btn-block" id="pt-save-btn">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script type="module" src="{% static 'js/projects.js' %}"></script>
+
 </body>
-
 </html>

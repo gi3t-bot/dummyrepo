@@ -1,4 +1,8 @@
-"""Serializers for the tasks app."""
+"""
+tasks/serializers.py
+serializer for tasks
+is_overdue is computed on the fly, no db column for it
+"""
 
 from rest_framework import serializers
 from django.utils import timezone
@@ -8,9 +12,9 @@ from users.serializers import UserSerializer
 
 class TaskSerializer(serializers.ModelSerializer):
     """
-    Full task serializer.
-    assigned_to_detail provides nested user info for display.
-    is_overdue is a computed field — no DB column needed.
+    full task serializer
+    assigned_to_detail gives nested user info so the frontend can show the username
+    is_overdue is calculated based on due_date vs today
     """
 
     assigned_to_detail = UserSerializer(source='assigned_to', read_only=True)
@@ -29,7 +33,7 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
     def get_is_overdue(self, obj):
-        """A task is overdue if it has a due date, isn't completed, and the date has passed."""
+        """overdue = has a due date, not completed yet, and the date already passed"""
         if obj.due_date and obj.status != 'completed':
             return obj.due_date < timezone.now().date()
         return False
@@ -61,6 +65,6 @@ class TaskSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        """Auto-set created_by to the requesting user."""
+        """auto set created_by to whoever made the request"""
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)

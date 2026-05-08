@@ -1,32 +1,29 @@
-/**
- * dashboard.js — Loads stats, recent tasks, and projects for the dashboard page.
- */
+// dashboard.js
+// loads the stats, recent tasks and projects for the dashboard page
 
 import { api, getUser, clearAuth } from './api.js';
 import { requireAuth, showToast, formatDate, statusBadge, initThemeToggle } from './utils.js';
 
-// Protect this page
+// kick out if not logged in
 requireAuth();
 
 const user = getUser();
 
-// Set up UI with user info
+// fill in the user info at the top
 document.getElementById('sidebar-username').textContent = user?.username || 'User';
-document.getElementById('welcome-msg').textContent = `Welcome back, ${user?.first_name || user?.username}!`;
+document.getElementById('welcome-msg').textContent = `welcome back, ${user?.first_name || user?.username}!`;
 const roleBadge = document.getElementById('role-badge');
 roleBadge.textContent = user?.role;
 roleBadge.classList.add(user?.role === 'admin' ? 'badge-admin' : 'badge-member');
 
-// Theme toggle
 initThemeToggle('theme-btn');
 
-// Logout
 document.getElementById('logout-btn').addEventListener('click', () => {
   clearAuth();
   window.location.href = '/';
 });
 
-/* Load dashboard stats */
+// fetch the numbers from the backend and put them in the boxes
 async function loadStats() {
   try {
     const stats = await api.get('/tasks/dashboard/');
@@ -36,22 +33,22 @@ async function loadStats() {
     document.getElementById('stat-overdue').textContent   = stats.overdue;
     document.getElementById('stat-mine').textContent      = stats.my_tasks;
   } catch (err) {
-    console.error('Failed to load stats:', err);
+    console.error('stats failed to load:', err);
   }
 }
 
-/* Load recent tasks (my assigned tasks) */
+// show the 5 most recent tasks assigned to me
 async function loadRecentTasks() {
   const container = document.getElementById('recent-tasks');
   try {
     const tasks = await api.get('/tasks/');
-    const myTasks = tasks.slice(0, 5); // Show first 5
+    const myTasks = tasks.slice(0, 5);
 
     if (myTasks.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">✅</div>
-          <p>No tasks assigned yet.</p>
+          <p>no tasks assigned yet</p>
         </div>`;
       return;
     }
@@ -80,11 +77,11 @@ async function loadRecentTasks() {
         </table>
       </div>`;
   } catch (err) {
-    container.innerHTML = `<div class="alert alert-error">Failed to load tasks.</div>`;
+    container.innerHTML = `<div class="alert alert-error">couldnt load tasks</div>`;
   }
 }
 
-/* Load recent projects */
+// show the 4 most recent projects
 async function loadRecentProjects() {
   const container = document.getElementById('recent-projects');
   try {
@@ -95,28 +92,29 @@ async function loadRecentProjects() {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">📁</div>
-          <p>No projects yet. ${user?.role === 'admin' ? '<a href="/projects/">Create one →</a>' : 'Ask your admin to add you.'}</p>
+          <p>${user?.role === 'admin' ? '<a href="/projects/">create a project first →</a>' : 'ask your admin to add you to a project'}</p>
         </div>`;
       return;
     }
 
+    // just a simple grid of plain boxes
     container.innerHTML = `
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
         ${recent.map(p => `
           <a href="/projects/?id=${p.id}" style="text-decoration:none;">
-            <div class="stat-card" style="cursor:pointer;">
-              <div style="font-weight:600; color:var(--text-primary); margin-bottom:0.25rem;">${p.name}</div>
-              <div class="text-muted">${p.members_detail?.length || 0} members</div>
+            <div class="project-card">
+              <h3>${p.name}</h3>
+              <p class="project-meta">${p.members_detail?.length || 0} members</p>
             </div>
           </a>
         `).join('')}
       </div>`;
   } catch (err) {
-    container.innerHTML = `<div class="alert alert-error">Failed to load projects.</div>`;
+    container.innerHTML = `<div class="alert alert-error">couldnt load projects</div>`;
   }
 }
 
-// Load everything
+// run everything
 loadStats();
 loadRecentTasks();
 loadRecentProjects();

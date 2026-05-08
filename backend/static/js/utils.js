@@ -1,12 +1,8 @@
-/**
- * utils.js — Shared UI utilities used across all pages
- */
+// utils.js
+// random helper stuff used everywhere, put it all here so i dont repeat myself
 
-/**
- * Show a brief toast notification at the bottom-right corner.
- * @param {string} message
- * @param {number} duration - ms to show (default 3000)
- */
+// shows a little popup at the bottom right corner
+// disappears after 3 seconds by default
 export function showToast(message, duration = 3000) {
   let toast = document.getElementById('toast');
   if (!toast) {
@@ -19,10 +15,8 @@ export function showToast(message, duration = 3000) {
   setTimeout(() => toast.classList.remove('show'), duration);
 }
 
-/**
- * Format a date string to a readable format.
- * e.g. "2025-12-31" → "Dec 31, 2025"
- */
+// formats "2025-12-31" → "Dec 31, 2025"
+// the T00:00:00 trick is bc without it js shifts the date by timezone
 export function formatDate(dateStr) {
   if (!dateStr) return '—';
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
@@ -30,9 +24,7 @@ export function formatDate(dateStr) {
   });
 }
 
-/**
- * Return a status badge HTML string.
- */
+// returns the colored badge html for a task status
 export function statusBadge(status) {
   const labels = {
     pending: 'Pending',
@@ -42,11 +34,9 @@ export function statusBadge(status) {
   return `<span class="badge badge-${status}">${labels[status] || status}</span>`;
 }
 
-/**
- * Dark mode toggle — reads/writes data-theme on <html>.
- * Persists choice in localStorage so there's no flicker on reload
- * (theme is applied immediately in <head> via an inline script).
- */
+// dark mode toggle
+// saves to localstorage so it doesnt reset on refresh
+// the inline script in <head> reads this before the page loads so no flicker
 export function initThemeToggle(buttonId) {
   const btn = document.getElementById(buttonId);
   if (!btn) return;
@@ -67,42 +57,37 @@ export function initThemeToggle(buttonId) {
   update();
 }
 
-/**
- * Redirect to login if no token is present.
- * Call this at the top of every protected page.
- */
+// redirect to login if theres no token
+// also blocks the back button after logout so you cant go back to the dashboard
 export function requireAuth() {
   if (!localStorage.getItem('access')) {
     window.location.href = '/';
     return;
   }
 
-  // Intercept the browser's "Back" button
+  // this part is a bit hacky but it works
+  // push a dummy state so the back button triggers our popstate handler
   if (!window.backBlockerInitialized) {
     window.backBlockerInitialized = true;
-    
-    // Push a dummy state into the history stack to trap the back button
+
     history.pushState(null, '', location.href);
-    
+
     window.addEventListener('popstate', () => {
-      // The user clicked "Back"
+      // user clicked back
       if (confirm('Are you sure you want to logout?')) {
-        // They clicked Yes -> clear tokens and go to login
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('user');
         window.location.href = '/';
       } else {
-        // They clicked No -> stay on the page by pushing another dummy state
+        // they said no, push another dummy state so they stay
         history.pushState(null, '', location.href);
       }
     });
   }
 }
 
-/**
- * Display a form error alert above the submit button.
- */
+// shows a red error box above the form
 export function showFormError(containerId, message) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -114,14 +99,11 @@ export function clearFormError(containerId) {
   if (container) container.innerHTML = '';
 }
 
-/**
- * Flatten DRF error responses into a single readable string.
- * DRF returns errors like: { "email": ["already exists"], "password": ["too short"] }
- */
+// django rest framework returns errors like { "email": ["already exists"] }
+// this flattens that into a readable string
 export function parseApiError(err) {
   if (typeof err === 'string') return err;
   if (err.detail) return err.detail;
-  // Flatten field errors
   return Object.entries(err)
     .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
     .join(' | ');

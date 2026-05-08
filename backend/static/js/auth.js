@@ -1,22 +1,18 @@
-/**
- * auth.js — Handles login and signup form logic
- */
+// auth.js
+// handles the login and signup forms
 
 import { api, saveTokens, saveUser } from './api.js';
 import { showToast, showFormError, clearFormError, parseApiError, initThemeToggle } from './utils.js';
 
-// Redirect if already logged in
+// if already logged in just skip to dashboard
 if (localStorage.getItem('access')) {
   window.location.href = '/dashboard/';
 }
 
-// Initialize theme toggle
 initThemeToggle('theme-btn');
 
-/**
- * Tab switching between Login and Signup forms.
- * Made global so the onclick="switchTab()" in HTML can call it.
- */
+// made this global bc the html buttons use onclick="switchTab()"
+// module scope functions arent accessible from html onclick otherwise
 window.switchTab = function(tab) {
   const loginForm   = document.getElementById('login-form');
   const signupForm  = document.getElementById('signup-form');
@@ -36,9 +32,7 @@ window.switchTab = function(tab) {
   }
 };
 
-/* ========================
-   LOGIN
-   ======================== */
+// LOGIN
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   clearFormError('login-error');
@@ -47,7 +41,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('login-password').value;
 
   if (!username || !password) {
-    showFormError('login-error', 'Please fill in all fields.');
+    showFormError('login-error', 'fill in both fields pls');
     return;
   }
 
@@ -58,11 +52,11 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   try {
     const data = await api.post('/auth/login/', { username, password });
 
-    // Save JWT tokens and user profile to localStorage
+    // save the tokens + user info
     saveTokens(data.access, data.refresh);
     saveUser(data.user);
 
-    showToast('Welcome back, ' + data.user.username + '!');
+    showToast('welcome back ' + data.user.username + '!');
     setTimeout(() => { window.location.href = '/dashboard/'; }, 600);
 
   } catch (err) {
@@ -72,9 +66,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   }
 });
 
-/* ========================
-   SIGNUP
-   ======================== */
+// SIGNUP
 document.getElementById('signup-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   clearFormError('signup-error');
@@ -89,12 +81,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   };
 
   if (!payload.username || !payload.email || !payload.password) {
-    showFormError('signup-error', 'Username, email, and password are required.');
+    showFormError('signup-error', 'username, email and password are required');
     return;
   }
 
   if (payload.password !== payload.password2) {
-    showFormError('signup-error', 'Passwords do not match.');
+    showFormError('signup-error', 'passwords dont match');
     return;
   }
 
@@ -104,9 +96,9 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
   try {
     await api.post('/users/register/', payload);
-    showToast('Account created! Please log in.');
+    showToast('account created! now login');
     window.switchTab('login');
-    // Pre-fill the username field for convenience
+    // prefill username so they dont have to type it again
     document.getElementById('login-username').value = payload.username;
   } catch (err) {
     showFormError('signup-error', parseApiError(err));

@@ -1,6 +1,6 @@
 """
-Views for the users app.
-Handles registration, login, and profile retrieval.
+users/views.py
+login, signup, profile stuff
 """
 
 from rest_framework import generics, permissions, status
@@ -14,31 +14,31 @@ from .serializers import UserSerializer, RegisterSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
-    Extends the default JWT login response to include user info.
-    Frontend needs role + username after login — this adds them to the token response.
+    extends the default login response to include user info
+    the frontend needs the role + username right after login
+    so i just added them to the jwt response
     """
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        # Add user details to the response
         data['user'] = UserSerializer(self.user).data
         return data
 
 
 class LoginView(TokenObtainPairView):
-    """POST /api/auth/login/ — returns access + refresh tokens + user info."""
+    """POST /api/auth/login/ — returns tokens + user info"""
     serializer_class = CustomTokenObtainPairSerializer
 
 
 class RegisterView(generics.CreateAPIView):
-    """POST /api/users/register/ — create a new user account."""
+    """POST /api/users/register/ — anyone can register, no auth needed"""
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]  # No auth needed to register
+    permission_classes = [permissions.AllowAny]
 
 
 class ProfileView(APIView):
-    """GET /api/users/me/ — returns the logged-in user's profile."""
+    """GET /api/users/me/ — returns the currently logged in user"""
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -47,7 +47,7 @@ class ProfileView(APIView):
 
 
 class UserListView(generics.ListAPIView):
-    """GET /api/users/ — list all users (admin use: assign tasks, add to projects)."""
+    """GET /api/users/ — list all users (admins use this to assign tasks and add members)"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]

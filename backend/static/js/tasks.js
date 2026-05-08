@@ -1,6 +1,5 @@
-/**
- * tasks.js — Task listing, creation (admin), and status update (member)
- */
+// tasks.js
+// task listing, creating (admin only) and updating status (members can do this)
 
 import { api, getUser, clearAuth } from './api.js';
 import { requireAuth, showToast, formatDate, statusBadge, initThemeToggle, parseApiError, showFormError, clearFormError } from './utils.js';
@@ -16,28 +15,25 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   window.location.href = '/';
 });
 
-// Admin sees "New Task" button
+// only admins get the "new task" button
 if (user?.role === 'admin') {
   document.getElementById('new-task-btn').style.display = '';
 }
 
 let allTasks = [];
 
-/* ========================
-   MODAL HELPERS
-   ======================== */
+// modal helpers (global so html onclick can call them)
 window.openModal  = (id) => document.getElementById(id).classList.add('open');
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
+// click outside = close
 document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) backdrop.classList.remove('open');
   });
 });
 
-/* ========================
-   LOAD TASKS
-   ======================== */
+// LOAD TASKS
 async function loadTasks() {
   const container = document.getElementById('tasks-container');
   const statusFilter = document.getElementById('filter-status').value;
@@ -47,7 +43,7 @@ async function loadTasks() {
     if (statusFilter) url += `?status=${statusFilter}`;
     allTasks = await api.get(url);
 
-    // Client-side status filter fallback
+    // filter client side too just in case the backend doesnt filter by status
     let filtered = allTasks;
     if (statusFilter) {
       filtered = allTasks.filter(t => t.status === statusFilter);
@@ -57,7 +53,7 @@ async function loadTasks() {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">✅</div>
-          <p>No tasks found.</p>
+          <p>no tasks found</p>
         </div>`;
       return;
     }
@@ -78,12 +74,12 @@ async function loadTasks() {
           <tbody>
             ${filtered.map(task => `
               <tr>
-                <td style="font-weight:500;">${task.title}</td>
-                <td class="text-secondary">${task.project}</td>
+                <td style="font-weight:bold;">${task.title}</td>
+                <td>${task.project}</td>
                 <td>${task.assigned_to_detail?.username || '—'}</td>
                 <td>
                   ${statusBadge(task.status)}
-                  ${task.is_overdue ? '<span class="badge badge-overdue" style="margin-left:4px;">Overdue</span>' : ''}
+                  ${task.is_overdue ? '<span class="badge" style="background:#f8d7da;color:#721c24;border-color:#f5c6cb;margin-left:4px;">Overdue</span>' : ''}
                 </td>
                 <td>${formatDate(task.due_date)}</td>
                 <td>
@@ -99,18 +95,17 @@ async function loadTasks() {
         </table>
       </div>`;
   } catch (err) {
-    container.innerHTML = `<div class="alert alert-error">Failed to load tasks.</div>`;
+    container.innerHTML = `<div class="alert alert-error">couldnt load tasks</div>`;
   }
 }
 
-// Filter on change
+// reload when filter changes
 document.getElementById('filter-status').addEventListener('change', loadTasks);
 
-/* ========================
-   CREATE / EDIT TASK MODAL (Admin)
-   ======================== */
+// CREATE / EDIT TASK MODAL (admin only)
 let editingTask = null;
 
+// open modal in create mode
 document.getElementById('new-task-btn').addEventListener('click', async () => {
   editingTask = null;
   clearFormError('task-form-error');
@@ -126,6 +121,7 @@ document.getElementById('new-task-btn').addEventListener('click', async () => {
   openModal('task-modal');
 });
 
+// open modal in edit mode (prefill with existing task data)
 window.openEditModal = async function(taskId) {
   editingTask = allTasks.find(t => t.id === taskId);
   if (!editingTask) return;
@@ -143,6 +139,7 @@ window.openEditModal = async function(taskId) {
   openModal('task-modal');
 };
 
+// fills the project and user dropdowns inside the task modal
 async function populateProjectsAndUsers(selectedProject = null, selectedUser = null) {
   const [projects, users] = await Promise.all([
     api.get('/projects/'),
@@ -161,13 +158,14 @@ async function populateProjectsAndUsers(selectedProject = null, selectedUser = n
     ).join('');
 }
 
+// save task (handles both create and edit)
 document.getElementById('save-task-btn').addEventListener('click', async () => {
   clearFormError('task-form-error');
 
   const title = document.getElementById('task-title').value.trim();
   const project = document.getElementById('task-project').value;
   if (!title || !project) {
-    showFormError('task-form-error', 'Title and project are required.');
+    showFormError('task-form-error', 'title and project are required');
     return;
   }
 
@@ -186,11 +184,13 @@ document.getElementById('save-task-btn').addEventListener('click', async () => {
   try {
     const taskId = document.getElementById('edit-task-id').value;
     if (taskId) {
+      // editing existing
       await api.put(`/tasks/${taskId}/`, payload);
-      showToast('Task updated!');
+      showToast('task updated!');
     } else {
+      // creating new
       await api.post('/tasks/', payload);
-      showToast('Task created!');
+      showToast('task created!');
     }
     closeModal('task-modal');
     await loadTasks();
@@ -201,23 +201,19 @@ document.getElementById('save-task-btn').addEventListener('click', async () => {
   }
 });
 
-/* ========================
-   DELETE TASK (Admin)
-   ======================== */
+// DELETE TASK (admin only)
 window.deleteTask = async function(taskId) {
-  if (!confirm('Delete this task? This cannot be undone.')) return;
+  if (!confirm('delete this task?? this cant be undone')) return;
   try {
     await api.delete(`/tasks/${taskId}/`);
-    showToast('Task deleted.');
+    showToast('task deleted');
     await loadTasks();
   } catch {
-    showToast('Failed to delete task.');
+    showToast('failed to delete');
   }
 };
 
-/* ========================
-   UPDATE STATUS (Member)
-   ======================== */
+// UPDATE STATUS MODAL (for members who cant edit the full task)
 window.openStatusModal = function(taskId) {
   const task = allTasks.find(t => t.id === taskId);
   if (!task) return;
@@ -236,15 +232,15 @@ document.getElementById('confirm-status-btn').addEventListener('click', async ()
 
   try {
     await api.patch(`/tasks/${taskId}/`, { status });
-    showToast('Status updated!');
+    showToast('status updated!');
     closeModal('status-modal');
     await loadTasks();
   } catch {
-    showToast('Failed to update status.');
+    showToast('failed to update status');
   } finally {
     btn.disabled = false;
   }
 });
 
-// Initialize
+// go
 loadTasks();

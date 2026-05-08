@@ -1,6 +1,7 @@
 """
-Serializers for the users app.
-Serializers convert model instances → JSON and validate incoming data.
+users/serializers.py
+convert user model to/from json
+also handles registration validation
 """
 
 from rest_framework import serializers
@@ -9,19 +10,18 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Read-only user info — used when returning user data."""
+    """read only - used when returning user data, never expose the password"""
 
     class Meta:
         model = User
-        # Only expose safe fields, never expose password
         fields = ['id', 'username', 'email', 'role', 'first_name', 'last_name']
         read_only_fields = ['id']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
-    Handles user registration.
-    password2 is a write-only confirmation field — never stored.
+    for signup
+    password2 is just for confirmation, we dont store it
     """
 
     password = serializers.CharField(write_only=True, validators=[validate_password])
@@ -32,16 +32,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'password2', 'first_name', 'last_name']
 
     def validate(self, attrs):
-        """Ensure both passwords match."""
+        """check passwords match"""
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
         return attrs
 
     def create(self, validated_data):
-        """Create user with properly hashed password."""
-        validated_data.pop('password2')  # Remove confirmation field before saving
+        """hash the password properly before saving"""
+        validated_data.pop('password2')  # dont save this
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  # This hashes the password
+        user.set_password(password)  # this hashes it
         user.save()
         return user

@@ -1,7 +1,7 @@
 """
-Custom User model.
-Extends Django's AbstractUser to add a 'role' field.
-We use AbstractUser so we keep all built-in auth features (password hashing, etc.)
+users/models.py
+custom user model, extended django's AbstractUser so i dont have to rewrite all the auth stuff
+just added a role field on top
 """
 
 from django.contrib.auth.models import AbstractUser
@@ -10,10 +10,9 @@ from django.db import models
 
 class User(AbstractUser):
     """
-    Custom user model with role-based access.
-    Roles:
-      - admin: Can create projects, assign tasks, manage members
-      - member: Can only view/update tasks assigned to them
+    two roles: admin and member
+    admin can create projects, assign tasks, manage members
+    member can only see and update their own tasks
     """
 
     ROLE_CHOICES = [
@@ -27,7 +26,7 @@ class User(AbstractUser):
         default='member',
     )
 
-    # email is required and must be unique
+    # email has to be unique, used for login sometimes
     email = models.EmailField(unique=True)
 
     def __str__(self):
@@ -35,5 +34,5 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        """Convenience property to check admin role."""
+        """quick check instead of doing user.role == 'admin' everywhere"""
         return self.role == 'admin'

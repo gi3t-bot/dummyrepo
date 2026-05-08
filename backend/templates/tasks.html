@@ -1,135 +1,139 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tasks — TeamTask</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="description" content="View and manage your tasks." />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script>
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
   </script>
 </head>
-
 <body>
 
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <h2>🗂️ TeamTask</h2>
-        <p id="sidebar-username"></p>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard/">📊 Dashboard</a>
-        <a href="/projects/">📁 Projects</a>
-        <a href="/tasks/" class="active">✅ My Tasks</a>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="theme-toggle w-100" id="theme-btn">🌙 Dark</button>
-        <button class="btn btn-outline w-100" id="logout-btn" style="margin-top: 0.5rem;">🚪 Logout</button>
-      </div>
-    </aside>
+<div class="app-layout">
 
-    <main class="main-content">
-      <div class="topbar">
-        <h1>Tasks</h1>
-        <div class="topbar-actions">
-          <!-- Filter by status -->
-          <select class="form-control" id="filter-status" style="width:auto;">
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <button class="btn btn-primary" id="new-task-btn" style="display:none;">+ New Task</button>
-        </div>
-      </div>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>🗂️ TeamTask</h2>
+      <p id="sidebar-username"></p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard/">📊 Dashboard</a>
+      <a href="/projects/">📁 Projects</a>
+      <a href="/tasks/" class="active">✅ My Tasks</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="theme-btn">🌙 Dark</button>
+      <button class="btn btn-outline" id="logout-btn">🚪 Logout</button>
+    </div>
+  </aside>
 
-      <div id="tasks-container">
-        <div class="empty-state">
-          <div class="empty-icon">⏳</div>
-          <p>Loading tasks...</p>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Create/Edit Task Modal -->
-  <div class="modal-backdrop" id="task-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="task-modal-title">Create Task</h3>
-        <button class="modal-close" onclick="closeModal('task-modal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="task-form-error"></div>
-        <input type="hidden" id="edit-task-id" />
-        <div class="form-group">
-          <label for="task-title">Title *</label>
-          <input id="task-title" class="form-control" type="text" placeholder="What needs to be done?" required />
-        </div>
-        <div class="form-group">
-          <label for="task-description">Description</label>
-          <textarea id="task-description" class="form-control" rows="3" placeholder="Add more details..."></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="task-project">Project *</label>
-            <select id="task-project" class="form-control"></select>
-          </div>
-          <div class="form-group">
-            <label for="task-assigned">Assign To</label>
-            <select id="task-assigned" class="form-control"></select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="task-status">Status</label>
-            <select id="task-status" class="form-control">
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="task-due">Due Date</label>
-            <input id="task-due" class="form-control" type="date" />
-          </div>
-        </div>
-        <button class="btn btn-primary btn-block" id="save-task-btn">Create Task</button>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>Tasks</h1>
+      <div class="topbar-actions">
+        <label for="filter-status" style="font-size:12px; margin-right:4px;">Filter:</label>
+        <select class="form-control" id="filter-status" style="width:auto;">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <!-- admin only -->
+        <button class="btn btn-primary" id="new-task-btn" style="display:none;">+ New Task</button>
       </div>
     </div>
-  </div>
 
-  <!-- Update Status Modal (for members) -->
-  <div class="modal-backdrop" id="status-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Update Task Status</h3>
-        <button class="modal-close" onclick="closeModal('status-modal')">✕</button>
+    <div id="tasks-container">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <p>Loading tasks...</p>
       </div>
-      <div class="modal-body">
-        <input type="hidden" id="status-task-id" />
-        <p class="mb-2" id="status-task-title"></p>
+    </div>
+  </main>
+</div>
+
+<!-- Create/Edit Task Modal -->
+<div class="modal-backdrop" id="task-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="task-modal-title">Create Task</h3>
+      <button class="modal-close" onclick="closeModal('task-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="task-form-error"></div>
+      <input type="hidden" id="edit-task-id" />
+
+      <div class="form-group">
+        <label for="task-title">Title *</label>
+        <input id="task-title" class="form-control" type="text" placeholder="What needs to be done?" required />
+      </div>
+
+      <div class="form-group">
+        <label for="task-description">Description</label>
+        <textarea id="task-description" class="form-control" rows="3" placeholder="Add more details..."></textarea>
+      </div>
+
+      <div class="form-row">
         <div class="form-group">
-          <label for="new-status">New Status</label>
-          <select id="new-status" class="form-control">
+          <label for="task-project">Project *</label>
+          <select id="task-project" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="task-assigned">Assign To</label>
+          <select id="task-assigned" class="form-control"></select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="task-status">Status</label>
+          <select id="task-status" class="form-control">
             <option value="pending">Pending</option>
             <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         </div>
-        <button class="btn btn-primary btn-block" id="confirm-status-btn">Update Status</button>
+        <div class="form-group">
+          <label for="task-due">Due Date</label>
+          <input id="task-due" class="form-control" type="date" />
+        </div>
       </div>
+
+      <button class="btn btn-primary btn-block" id="save-task-btn">Create Task</button>
     </div>
   </div>
+</div>
 
-  <div id="toast"></div>
-  <script type="module" src="{% static 'js/tasks.js' %}"></script>
+<!-- Update Status Modal (for members) -->
+<div class="modal-backdrop" id="status-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Update Task Status</h3>
+      <button class="modal-close" onclick="closeModal('status-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="status-task-id" />
+      <p class="mb-2" id="status-task-title"></p>
+      <div class="form-group">
+        <label for="new-status">New Status</label>
+        <select id="new-status" class="form-control">
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" id="confirm-status-btn">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script type="module" src="{% static 'js/tasks.js' %}"></script>
+
 </body>
-
 </html>

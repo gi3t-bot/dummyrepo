@@ -4,14 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TeamTask — Login</title>
+  <title>TeamTask - Login</title>
   <meta name="description" content="Sign in to TeamTask to manage your projects and tasks." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-
-  <!-- Apply saved theme immediately to prevent flash of wrong theme -->
   <script>
+    /* apply saved theme before page loads so no flicker */
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
   </script>
@@ -19,14 +16,14 @@
 <body class="auth-page">
 
   <div class="auth-card">
-    <!-- Brand -->
+
     <div class="brand">
       <h1>🗂️ TeamTask</h1>
       <p>Manage projects and tasks with your team</p>
     </div>
 
-    <!-- Tab switcher: Login / Signup -->
-    <div class="d-flex gap-1 mb-3" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+    <!-- tab switcher -->
+    <div class="d-flex gap-1 mb-2" style="border-bottom: 1px solid #ccc; padding-bottom: 10px;">
       <button class="btn btn-primary" id="tab-login" onclick="switchTab('login')">Login</button>
       <button class="btn btn-outline" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
     </div>
@@ -34,22 +31,24 @@
     <!-- Login Form -->
     <form id="login-form" novalidate>
       <div id="login-error"></div>
+
       <div class="form-group">
         <label for="login-username">Username</label>
-        <input id="login-username" class="form-control" type="text" placeholder="Enter your username" required />
+        <input id="login-username" class="form-control" type="text" placeholder="your username" required />
       </div>
+
       <div class="form-group">
         <label for="login-password">Password</label>
-        <input id="login-password" class="form-control" type="password" placeholder="Enter your password" required />
+        <input id="login-password" class="form-control" type="password" placeholder="your password" required />
       </div>
-      <button class="btn btn-primary btn-block" type="submit" id="login-btn">
-        Sign In
-      </button>
+
+      <button class="btn btn-primary btn-block" type="submit" id="login-btn">Sign In</button>
     </form>
 
-    <!-- Signup Form (hidden initially) -->
+    <!-- Signup Form -->
     <form id="signup-form" style="display:none;" novalidate>
       <div id="signup-error"></div>
+
       <div class="form-row">
         <div class="form-group">
           <label for="signup-first">First Name</label>
@@ -60,35 +59,38 @@
           <input id="signup-last" class="form-control" type="text" placeholder="Doe" />
         </div>
       </div>
+
       <div class="form-group">
-        <label for="signup-username">Username</label>
+        <label for="signup-username">Username *</label>
         <input id="signup-username" class="form-control" type="text" placeholder="janedoe" required />
       </div>
+
       <div class="form-group">
-        <label for="signup-email">Email</label>
+        <label for="signup-email">Email *</label>
         <input id="signup-email" class="form-control" type="email" placeholder="jane@example.com" required />
       </div>
+
       <div class="form-group">
-        <label for="signup-password">Password</label>
+        <label for="signup-password">Password *</label>
         <input id="signup-password" class="form-control" type="password" placeholder="Min 8 characters" required />
       </div>
+
       <div class="form-group">
-        <label for="signup-password2">Confirm Password</label>
+        <label for="signup-password2">Confirm Password *</label>
         <input id="signup-password2" class="form-control" type="password" placeholder="Repeat password" required />
       </div>
-      <button class="btn btn-primary btn-block" type="submit" id="signup-btn">
-        Create Account
-      </button>
+
+      <button class="btn btn-primary btn-block" type="submit" id="signup-btn">Create Account</button>
     </form>
 
-    <!-- Theme toggle -->
-    <div style="text-align:center; margin-top: 1.5rem;">
-      <button class="theme-toggle" id="theme-btn">🌙 Dark</button>
+    <div style="margin-top: 14px; text-align: center;">
+      <button class="theme-toggle" id="theme-btn" style="background:#eee; border:1px solid #aaa; color:#333; padding:4px 12px; font-size:12px; cursor:pointer;">🌙 Dark</button>
     </div>
+
   </div>
 
   <div id="toast"></div>
-
   <script type="module" src="{% static 'js/auth.js' %}"></script>
+
 </body>
 </html>

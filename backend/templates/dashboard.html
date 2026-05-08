@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — TeamTask</title>
   <meta name="description" content="Your project and task overview dashboard." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script>
     const saved = localStorage.getItem('theme') || 'light';
@@ -17,6 +15,7 @@
 <body>
 
 <div class="app-layout">
+
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
@@ -35,26 +34,26 @@
       </a>
     </nav>
     <div class="sidebar-footer">
-      <button class="theme-toggle w-100" id="theme-btn">🌙 Dark</button>
-      <button class="btn btn-outline w-100 mt-1" id="logout-btn" style="margin-top: 0.5rem;">
-        🚪 Logout
-      </button>
+      <button class="theme-toggle" id="theme-btn">🌙 Dark</button>
+      <button class="btn btn-outline" id="logout-btn" style="margin-top: 0;">🚪 Logout</button>
     </div>
   </aside>
 
   <!-- Main Content -->
   <main class="main-content">
+
+    <!-- Top bar -->
     <div class="topbar">
       <div>
         <h1>Dashboard</h1>
-        <p class="text-secondary" id="welcome-msg">Welcome back!</p>
+        <p id="welcome-msg">Welcome back!</p>
       </div>
       <div class="topbar-actions">
         <span id="role-badge" class="badge"></span>
       </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Stats - intern just put 5 boxes in a row -->
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card stat-total">
         <div class="stat-icon">📋</div>
@@ -83,11 +82,11 @@
       </div>
     </div>
 
-    <!-- Recent Tasks -->
+    <!-- Recent Tasks table -->
     <div class="card mb-3">
       <div class="card-header">
         <h2>My Tasks</h2>
-        <a href="/tasks/" class="btn btn-outline btn-sm">View All →</a>
+        <a href="/tasks/" class="btn btn-outline btn-sm">View All &rarr;</a>
       </div>
       <div class="card-body" id="recent-tasks">
         <div class="empty-state">
@@ -97,11 +96,11 @@
       </div>
     </div>
 
-    <!-- Projects -->
+    <!-- Recent Projects -->
     <div class="card">
       <div class="card-header">
         <h2>My Projects</h2>
-        <a href="/projects/" class="btn btn-outline btn-sm">View All →</a>
+        <a href="/projects/" class="btn btn-outline btn-sm">View All &rarr;</a>
       </div>
       <div class="card-body" id="recent-projects">
         <div class="empty-state">
@@ -110,10 +109,12 @@
         </div>
       </div>
     </div>
+
   </main>
 </div>
 
 <div id="toast"></div>
 <script type="module" src="{% static 'js/dashboard.js' %}"></script>
+
 </body>
 </html>
