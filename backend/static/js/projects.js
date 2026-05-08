@@ -160,10 +160,19 @@ document.getElementById('add-member-btn').addEventListener('click', async () => 
 });
 
 document.getElementById('confirm-add-member-btn').addEventListener('click', async () => {
-  const memberId = parseInt(document.getElementById('member-select').value);
+  const select = document.getElementById('member-select');
+  const selectedOptions = Array.from(select.selectedOptions);
+  
+  if (selectedOptions.length === 0) {
+    showToast('select someone first');
+    return;
+  }
+  
+  const memberIds = selectedOptions.map(opt => parseInt(opt.value));
   const existingIds = currentProject.members.map(Number);
+  
   // use Set to avoid adding the same person twice
-  const newMembers = [...new Set([...existingIds, memberId])];
+  const newMembers = [...new Set([...existingIds, ...memberIds])];
 
   try {
     const updated = await api.put(`/projects/${currentProject.id}/`, {
@@ -174,9 +183,9 @@ document.getElementById('confirm-add-member-btn').addEventListener('click', asyn
     currentProject = updated;
     renderMembers(updated.members_detail || []);
     closeModal('member-modal');
-    showToast('member added!');
+    showToast(`added ${memberIds.length} member(s)!`);
   } catch (err) {
-    showToast('failed to add member');
+    showToast('failed to add members');
   }
 });
 
